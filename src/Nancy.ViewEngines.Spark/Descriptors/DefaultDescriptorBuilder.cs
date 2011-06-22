@@ -2,8 +2,7 @@
 {
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
-    using Spark;
+    using System.Linq;    
     using global::Spark;
     using global::Spark.Parser;
     using global::Spark.Parser.Syntax;
@@ -53,7 +52,7 @@
         {
             var descriptor = new SparkViewDescriptor
                                  {
-                                     TargetNamespace = buildDescriptorParams.ViewPath
+                                     TargetNamespace = buildDescriptorParams.ViewPath.Replace('\\', '.')
                                  };
 
             if (!LocatePotentialTemplate(
@@ -69,7 +68,8 @@
             if (!string.IsNullOrEmpty(buildDescriptorParams.MasterName))
             {
                 if (!LocatePotentialTemplate(
-                    PotentialMasterLocations(buildDescriptorParams.MasterName,
+                    PotentialMasterLocations(buildDescriptorParams.ViewPath,
+                                             buildDescriptorParams.MasterName,
                                              buildDescriptorParams.Extra),
                     descriptor.Templates,
                     searchedLocations))
@@ -90,7 +90,8 @@
             while (buildDescriptorParams.FindDefaultMaster && !string.IsNullOrEmpty(trailingUseMaster))
             {
                 if (!LocatePotentialTemplate(
-                    PotentialMasterLocations(trailingUseMaster,
+                    PotentialMasterLocations(buildDescriptorParams.ViewPath, 
+                                             trailingUseMaster,
                                              buildDescriptorParams.Extra),
                     descriptor.Templates,
                     searchedLocations))
@@ -162,22 +163,20 @@
                                     }, extra);
         }
 
-        protected virtual IEnumerable<string> PotentialMasterLocations(string masterName, IDictionary<string, object> extra)
+        protected virtual IEnumerable<string> PotentialMasterLocations(string viewPath, string masterName, IDictionary<string, object> extra)
         {
             return ApplyFilters(new[]
                                     {
                                         Path.Combine("Layouts", masterName + ".spark"),
-                                        Path.Combine("Shared", masterName + ".spark")
+                                        Path.Combine("Shared", masterName + ".spark"),
+                                        Path.Combine(viewPath, "Layouts", masterName + ".spark"),
+                                        Path.Combine(viewPath, "Shared", masterName + ".spark")
                                     }, extra);
         }
 
-        protected virtual IEnumerable<string> PotentialDefaultMasterLocations(string controllerName, IDictionary<string, object> extra)
+        protected virtual IEnumerable<string> PotentialDefaultMasterLocations(string viewPath, IDictionary<string, object> extra)
         {
-            return ApplyFilters(new[]
-                                    {
-                                        Path.Combine("Layouts", "Application.spark"),
-                                        Path.Combine("Shared", "Application.spark")
-                                    }, extra);
+            return PotentialMasterLocations(viewPath, "Application", extra);
         }
 
         /// <summary>
