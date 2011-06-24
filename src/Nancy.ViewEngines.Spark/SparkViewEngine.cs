@@ -15,21 +15,22 @@
     public class SparkViewEngine : IViewEngine
     {
         private readonly IDescriptorBuilder descriptorBuilder;
-        private readonly ISparkViewEngine engine;
-        private readonly ISparkSettings settings;
+        private readonly ISparkViewEngine engine;        
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SparkViewEngine"/> class.
         /// </summary>
-        public SparkViewEngine()
+        public SparkViewEngine() : this((ISparkSettings) ConfigurationManager.GetSection("spark") ?? new SparkSettings())
         {
-            this.settings = (ISparkSettings) ConfigurationManager.GetSection("spark") ?? new SparkSettings();
+        }
 
-            this.engine = new global::Spark.SparkViewEngine(this.settings)
+        public SparkViewEngine(ISparkSettings settings)
+        {
+            if (String.IsNullOrWhiteSpace(settings.PageBaseType)) 
             {
-                DefaultPageBaseType = typeof(NancySparkView).FullName
-            };
-
+              settings.PageBaseType = typeof (NancySparkView).FullName;
+            }
+            this.engine = new global::Spark.SparkViewEngine(settings);
             this.descriptorBuilder = new DefaultDescriptorBuilder(this.engine);
         }
 
