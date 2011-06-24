@@ -1,4 +1,6 @@
-﻿namespace Nancy.ViewEngines.Spark.Descriptors
+﻿using System.Text.RegularExpressions;
+
+namespace Nancy.ViewEngines.Spark.Descriptors
 {
     using System.Collections.Generic;
     using System.IO;
@@ -50,10 +52,11 @@
 
         public virtual SparkViewDescriptor BuildDescriptor(BuildDescriptorParams buildDescriptorParams, ICollection<string> searchedLocations)
         {
-            var descriptor = new SparkViewDescriptor
-                                 {
-                                     TargetNamespace = buildDescriptorParams.ViewPath.Replace('\\', '.')
-                                 };
+            // Is there any other characters that are allowed in the path which 
+            // are not allowed in a c# class name / namespace?
+            Regex illegalNamespaceChars = new Regex("\\/"); 
+            string namespage = illegalNamespaceChars.Replace(buildDescriptorParams.ViewPath, "");
+            var descriptor = new SparkViewDescriptor { TargetNamespace = namespage };
 
             if (!LocatePotentialTemplate(
                 PotentialViewLocations(buildDescriptorParams.ViewPath,
