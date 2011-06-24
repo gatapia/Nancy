@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace Nancy.ViewEngines.Spark.Descriptors
 {
@@ -54,8 +55,8 @@ namespace Nancy.ViewEngines.Spark.Descriptors
         {
             // Is there any other characters that are allowed in the path which 
             // are not allowed in a c# class name / namespace?
-            Regex illegalNamespaceChars = new Regex("\\/"); 
-            string namespage = illegalNamespaceChars.Replace(buildDescriptorParams.ViewPath, "");
+            Regex illegalNamespaceChars = new Regex(@"[\\/]+"); 
+            string namespage = illegalNamespaceChars.Replace(buildDescriptorParams.ViewPath, String.Empty);
             var descriptor = new SparkViewDescriptor { TargetNamespace = namespage };
 
             if (!LocatePotentialTemplate(
